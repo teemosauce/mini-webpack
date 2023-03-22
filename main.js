@@ -53,9 +53,9 @@ async function createAsset(filename) {
         ImportDeclaration({ node }) {
             let value = node.source.value
             if (value.endsWith('.js')) {
-                dependencies.push(value)
+                dependencies.push(value) // js依赖
             } else if (value.endsWith('.css')) {
-                module.styles.push(value)
+                module.styles.push(value) // css 依赖 后续未实现 
             }
         }
     })
@@ -117,11 +117,12 @@ function bundle(graph) {
         let module = graph[i];
 
         module.dependencies.forEach(dependency => {
-            module.code = module.code.replace(`require("${dependency}")`, `require(${module.mapping[dependency]})`)
+            module.code = module.code.replace(`require("${dependency}")`, `require(${module.mapping[dependency]})`) // 替换模块路径为模块的编号
         })
         modules += `${module.id}: function (require, module, exports){ ${module.code} }, `
     }
 
+    // 注入自定义的require方法
     const code = `
     (function(modules) {
       const moduleCached = {};
