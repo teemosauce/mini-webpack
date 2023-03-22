@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="./output.js"></script>
+    <style>
+        .content {
+            box-sizing: border-box;
+            border: 1px solid salmon;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 500px;
+        }
+
+        .large-text {
+            font-size: 20px;
+        }
+
+        .small-text {
+            font-size: 30px;
+            margin-left: 10px;
+        }
+
+        .parent {
+            border: 10px solid red;
+            position: relative;
+        }
+
+        .child1 {
+            background-color: brown;
+            width: 200px;
+            height: 200px;
+            position: absolute;
+            right: 0;
+            bottom: 0;
+        }
+
+        .child2 {
+            background-color: aqua;
+            width: 400px;
+            height: 400px;
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        <input type="number" id="input" min="0" />
+
+        <div class="content" id="box">
+            <span class="large-text">大大大大大大</span>
+            <span class="small-text">小小小小小小</span>
+        </div>
+
+        <div class="parent">
+
+            <div class="child1" id="child1">我是子元素 相对父元素</div>
+            <div class="child2">我是子元素二 相对父元素</div>
+        </div>
+    </div>
+</body>
+
+</html>
