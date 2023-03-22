@@ -17,7 +17,9 @@ let ID = START_ID
 let assetsMap = {}
 
 async function createAsset(filename) {
+    console.log(filename)
 
+    // 缓存模块
     let module = assetsMap[filename]
     if (module) {
         return module
@@ -83,6 +85,7 @@ async function createGraph(entry) {
     const graph = []
     while (queue.length) {
         let item = queue.shift();
+        // 解决递归依赖问题
         if (graph.find(it => it.id === item.id)) {
             continue
         }
@@ -96,10 +99,12 @@ async function createGraph(entry) {
             let subAsset = await createAsset(absolutePath);
             item.mapping[relativePath] = subAsset.id
 
-            // 没有的话才加入
+            // 解决递归依赖问题
             if (!queue.find(item => item.id === subAsset.id)) {
                 queue.push(subAsset)
             }
+
+            queue.push(subAsset)
         }
     }
 
@@ -125,15 +130,19 @@ function bundle(graph) {
     // 注入自定义的require方法
     const code = `
     (function(modules) {
-      const moduleCached = {};
-      function require(id) {
-        if (moduleCached[id]) {
-            return moduleCached[id]
+      const installedModules = {};
+      window.installedModules = installedModules;
+      function require(moduleId) {
+        if (installedModules[moduleId]) {
+            return installedModules[moduleId].exports;
         }
-        const fn = modules[id];
-        const module = { exports : {} };
-        fn(require, module, module.exports);
-        moduleCached[id] = module.exports;
+        const module = installedModules[moduleId] = {
+            id: moduleId,
+            load: false,
+            exports : {} 
+        };
+        modules[moduleId].call(module.exports, require, module, module.exports);
+        module.load = true;
         return module.exports;
       }
       require(${START_ID});
@@ -149,7 +158,7 @@ async function run() {
 
     // 打包文件
     let code = bundle(graph);
-    console.log(code)
+    // console.log(code)
     fs.writeFile('output.js', code, (err, data) => {
         // console.log(err)
     })
