@@ -1,4 +1,4 @@
-const fs = require('fs');
+const fs = require('fs-extra');
 const path = require('path');
 const babylon = require('babylon') // 用于将源码转成AST
 const traverse = require('babel-traverse').default // 遍历AST
@@ -36,13 +36,10 @@ async function createAsset(filename) {
     }
     assetsMap[filename] = module
 
-    let sourceCode = await new Promise(resolve => {
-        fs.readFile(filename, {
-            encoding: 'utf-8'
-        }, (err, data) => {
-            resolve(data)
-        })
+    let sourceCode = await fs.readFile(filename, {
+        encoding: 'utf-8'
     })
+    console.log(sourceCode)
 
     //1.将源码变成抽象语法树
     const ast = babylon.parse(sourceCode, {
@@ -159,9 +156,10 @@ async function run() {
     // 打包文件
     let code = bundle(graph);
     // console.log(code)
-    fs.writeFile('output.js', code, (err, data) => {
-        // console.log(err)
-    })
+    if (!await fs.exists('dist')) {
+        await fs.mkdir('dist')
+    }
+   await fs.writeFile('dist/output.js', code)
 
     // 把生成后的源码写入新的文件
 }

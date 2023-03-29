@@ -23,6 +23,7 @@ function generateTree(depth) {
         }
         nextNode = generateNode(i + 1);
         curNode.children.push(nextNode);
+        curNode.children.push(generateNode(Math.random()));
         curNode = nextNode
     }
     return tree
@@ -117,24 +118,43 @@ function findNodeById3(id, tree) {
             break
         } else {
             if (Array.isArray(child.children) && child.children.length > 0) {
+                // console.log(child.children.reverse());
                 queue = queue.concat(child.children)
             }
         }
     }
-
     return node;
 }
 
-let tree = generateTree(300000)
-let FIND_ID = 2000
+/**
+ * 遍历树的每一个节点，记录当前每一个节点的路径信息（不能改变树的结构）
+ * @param {[Object]} tree 
+ */
+function formatTree(tree, parent) {
+    let children = Array.isArray(tree) ? tree : [tree];
+    parent = parent || {}
+    children.forEach(child => {
+        child.path = (parent.path || '/') + child.id + '/' // 根据当前节点信息计算路径
+        if (Array.isArray(child.children) && child.children.length > 0) {
+            child.children = formatTree(child.children, child);
+        }
+    })
+    return children
+}
 
-console.time("递归调用查找耗时")
-console.log(findNodeById(FIND_ID, tree))
-console.timeEnd("递归调用查找耗时")
+let tree = generateTree(30)
+console.log(tree);
+let FIND_ID = 3
 
-console.time("广度查找耗时")
-console.log(findNodeById2(FIND_ID, tree))
-console.timeEnd("广度查找耗时")
+// console.time("递归调用查找耗时")
+// console.log(findNodeById(FIND_ID, tree))
+// console.timeEnd("递归调用查找耗时")
+
+// console.time("广度查找耗时")
+// console.log(findNodeById2(FIND_ID, tree))
+// console.timeEnd("广度查找耗时")
+
+console.log(formatTree(tree))
 
 console.time("深度查找耗时")
 console.log(findNodeById3(FIND_ID, tree))
