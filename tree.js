@@ -168,3 +168,182 @@ console.timeEnd("深度查找耗时")
 // 广度查找耗时: 0.427ms
 // { id: 2000, children: [ { id: 2001, children: [Array] } ] }
 // 深度查找耗时: 0.422ms
+
+
+let arr = [
+    { id: 3, name: '部门3', pid: 1 },
+    { id: 1, name: '部门1', pid: 0 },
+    { id: 4, name: '部门4', pid: 3 },
+    { id: 2, name: '部门2', pid: 1 },
+    { id: 5, name: '部门5', pid: 4 },
+]
+
+/**
+ * 数组转树（递归法）
+ * @param {Array} array 
+ * @param {String} parentId 根节点的父节点ID 默认为0
+ * @returns 
+ */
+function arrayParseTree1(array, parentId) {
+    parentId = parentId || 0
+    let treeList = []
+    for (let i = 0, len = arr.length; i < len; i++) {
+        let item = arr[i];
+        let item_id = item.id;
+        let item_parent_id = item.pid;
+
+        if (item_parent_id == parentId) {
+            item.children = arrayParseTree1(array, item_id)
+            treeList.push(item)
+        }
+    }
+    return treeList;
+}
+
+/**
+ * 数组转树（双循环法）
+ * @param {Array} array 
+ * @param {String} parentId 根节点的父节点ID 默认为0
+ * @returns 
+ */
+function arrayParseTree2(array, parentId) {
+    parentId = parentId || 0
+    let map = {}
+    for (let i = 0, len = arr.length; i < len; i++) {
+        let item = arr[i];
+        let item_parent_id = item.pid;
+        if (!map[item_parent_id]) {
+            map[item_parent_id] = {
+                children: [item]
+            }
+        } else {
+            map[item_parent_id].children.push(item)
+        }
+
+    }
+
+    for (let parent_id in map) {
+        let children = map[parent_id].children
+        for (let i in children) {
+            let item = children[i];
+            let item_id = item.id;
+            if (map[item_id]) {
+                item.children = map[item_id].children
+            } else {
+                item.children = []
+            }
+        }
+    }
+    return map[parentId].children
+}
+
+/**
+ * 数组转树 （双循环法）
+ * @param {Array} array 
+ * @param {String} parentId 根节点的父节点ID 默认为0
+ * @returns 
+ */
+function arrayParseTree3(array, parentId) {
+    parentId = parentId || 0
+    let map = {
+        [parentId]: {
+            children: []
+        }
+    }
+    for (let i = 0, len = arr.length; i < len; i++) {
+        let item = arr[i];
+        let item_id = item.id;
+
+        if (!map[item_id]) {
+            map[item_id] = {
+                ...item,
+                children: []
+            }
+        }
+    }
+
+    for (let i = 0, len = arr.length; i < len; i++) {
+        let item = arr[i];
+        let item_id = item.id;
+        let item_parent_id = item.pid;
+        map[item_parent_id].children.push(map[item_id])
+    }
+
+    return map[parentId].children
+}
+
+/**
+ * 数组转树 （单循环法）
+ * @param {Array} array 
+ * @param {String} parentId 根节点的父节点ID 默认为0
+ * @returns 
+ */
+
+function arrayParseTree4(array, parentId) {
+    parentId = parentId || 0
+    let map = {
+        [parentId]: {
+            children: []
+        }
+    }
+    for (let i = 0, len = arr.length; i < len; i++) {
+        let item = arr[i];
+        let item_id = item.id;
+        let item_parent_id = item.pid;
+        if (!map[item_id]) {
+            map[item_id] = {
+                children: []
+            }
+        }
+
+        map[item_id] = {
+            ...item,
+            children: map[item_id].children
+        }
+
+        if (!map[item_parent_id]) {
+            map[item_parent_id] = {
+                children: []
+            }
+        }
+        map[item_parent_id].children.push(map[item_id])
+
+    }
+    console.log(map)
+    return map[parentId].children
+}
+console.log(arrayParseTree1(JSON.parse(JSON.stringify(arr))))
+console.log(arrayParseTree2(JSON.parse(JSON.stringify(arr))))
+console.log(arrayParseTree3(JSON.parse(JSON.stringify(arr))))
+console.log(arrayParseTree4(JSON.parse(JSON.stringify(arr))))
+
+
+/**
+ * 统一给树加上一个path path规则是父及path + 当前节点ID 例如0/1/3/4
+ * @param {Object|Array} tree 
+ */
+function formatTree(tree) {
+    tree = Array.isArray(tree) ? tree : [tree];
+
+    let queue = [...tree];
+
+    let _paths = {
+        0: '/0'
+    }
+    while (queue.length) {
+        let item = queue.shift();
+        let item_id = item.id;
+        let item_parent_id = item.pid;
+        let item_path = `${_paths[item_parent_id]}/${item_id}`
+        item.path = item_path
+        _paths[item_id] = item_path
+        if (Array.isArray(item.children) && item.children.length > 0) {
+            queue = item.children.concat(queue)
+        }
+    }
+
+    return tree
+}
+
+tree = formatTree(arrayParseTree4(JSON.parse(JSON.stringify(arr))))
+console.log(JSON.stringify(tree))
